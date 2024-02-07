@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { FC, MouseEvent, useState } from "react"
+import "./App.css"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const Box: FC<{
+	value: string
+	handleClick: (e: MouseEvent<HTMLButtonElement>) => void
+}> = ({ value, handleClick }) => {
+	return (
+		<button className="box" onClick={handleClick}>
+			{value}
+		</button>
+	)
 }
 
-export default App;
+const initialBoardState: string[] = Array(9).fill("")
+function App() {
+	const [boardState, setBoardState] = useState(initialBoardState)
+
+	const onBoxClick = (idx: number) => {
+		const newBoardState = boardState.map((item, index) => {
+			if (idx === index) item = "X"
+
+			return item
+		})
+
+		setBoardState(newBoardState)
+	}
+
+	return (
+		<div className="wrapper">
+			<div className="container">
+				{[0, 1, 2].map(rowIndex => (
+					<div className="row" key={rowIndex}>
+						{[0, 1, 2].map(colIndex => {
+							const boxIndex = rowIndex * 3 + colIndex
+
+							return (
+								<Box
+									key={boxIndex}
+									value={boardState[boxIndex]}
+									handleClick={() => onBoxClick(boxIndex)}
+								/>
+							)
+						})}
+					</div>
+				))}
+			</div>
+		</div>
+	)
+}
+
+export default App
