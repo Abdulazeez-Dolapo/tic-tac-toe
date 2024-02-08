@@ -15,15 +15,17 @@ const Box: FC<{
 const initialBoardState: string[] = Array(9).fill("")
 function App() {
 	const [boardState, setBoardState] = useState(initialBoardState)
+	const [counter, setCounter] = useState(0)
 
 	const onBoxClick = (idx: number) => {
 		const newBoardState = boardState.map((item, index) => {
-			if (idx === index) item = "X"
+			if (idx === index) item = counter % 2 === 0 ? "X" : "O"
 
 			return item
 		})
 
 		setBoardState(newBoardState)
+		setCounter(count => count + 1)
 	}
 
 	return (
