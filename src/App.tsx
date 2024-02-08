@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useState } from "react"
+import { FC, MouseEvent, useEffect, useState } from "react"
 import "./App.css"
 
 const Box: FC<{
@@ -14,19 +14,37 @@ const Box: FC<{
 
 const initialBoardState: string[] = Array(9).fill("")
 function App() {
-	const [boardState, setBoardState] = useState(initialBoardState)
 	const [counter, setCounter] = useState(0)
+	const [boardState, setBoardState] = useState(initialBoardState)
+	const [boardStateHistory, setBoardStateHistory] = useState([
+		initialBoardState,
+	])
+
+	const isPlayerOne = () => counter % 2 === 0
 
 	const onBoxClick = (idx: number) => {
 		const newBoardState = boardState.map((item, index) => {
-			if (idx === index) item = counter % 2 === 0 ? "X" : "O"
+			if (idx === index) item = isPlayerOne() ? "X" : "O"
 
 			return item
 		})
+		const newCounter = counter + 1
 
 		setBoardState(newBoardState)
-		setCounter(count => count + 1)
+		setCounter(newCounter)
+		updateHistory(newBoardState, newCounter)
 	}
+
+	const updateHistory = (currentBoardState: string[], index: number) => {
+		const newHistory = [...boardStateHistory]
+		newHistory[index] = currentBoardState
+
+		setBoardStateHistory(newHistory)
+	}
+
+	// useEffect(() => {
+	// 	console.log({ counter, boardState, boardStateHistory })
+	// }, [counter, boardState, boardStateHistory])
 
 	return (
 		<div className="wrapper">
