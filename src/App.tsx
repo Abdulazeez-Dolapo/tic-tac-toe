@@ -42,10 +42,6 @@ function App() {
 		setBoardStateHistory(newHistory)
 	}
 
-	// useEffect(() => {
-	// 	console.log({ counter, boardState, boardStateHistory })
-	// }, [counter, boardState, boardStateHistory])
-
 	return (
 		<div className="wrapper">
 			<div className="container">
