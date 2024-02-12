@@ -6,11 +6,26 @@ type BoardType = string[]
 const Box: FC<{
 	value: string
 	handleClick: (e: MouseEvent<HTMLButtonElement>) => void
-}> = ({ value, handleClick }) => {
+}> = ({ value, handleClick }) => (
+	<button className="box" onClick={handleClick}>
+		{value}
+	</button>
+)
+
+const WinningDisplay: FC<{
+	text: string
+	startNewGame: (e: MouseEvent<HTMLButtonElement>) => void
+	undoLastMove: (e: MouseEvent<HTMLButtonElement>) => void
+}> = ({ text, startNewGame, undoLastMove }) => {
 	return (
-		<button className="box" onClick={handleClick}>
-			{value}
-		</button>
+		<div>
+			<p>{text}</p>
+
+			<div>
+				<button onClick={startNewGame}>Start new game</button>
+				<button onClick={undoLastMove}>Undo Last Move</button>
+			</div>
+		</div>
 	)
 }
 
@@ -19,6 +34,7 @@ const initialBoardState: BoardType = Array(9).fill("")
 function App() {
 	const [counter, setCounter] = useState(0)
 	const [boardState, setBoardState] = useState(initialBoardState)
+	const [winningText, setWinningText] = useState("")
 	const [boardStateHistory, setBoardStateHistory] = useState([
 		initialBoardState,
 	])
@@ -38,6 +54,10 @@ function App() {
 		updateHistory(newBoardState, newCounter)
 
 		const isWinner = calculateWinner(newBoardState)
+		if (isWinner)
+			setWinningText(
+				`Player ${isPlayerOne() ? "one" : "two"} has won the game`
+			)
 		console.log({ isWinner })
 	}
 
@@ -76,6 +96,15 @@ function App() {
 		return isWinner
 	}
 
+	const resetAppState = () => {
+		setCounter(0)
+		setBoardState(initialBoardState)
+		setBoardStateHistory([initialBoardState])
+		setWinningText("")
+	}
+
+	const undoLastMove = () => {}
+
 	return (
 		<div className="wrapper">
 			<div className="container">
@@ -95,6 +124,14 @@ function App() {
 					</div>
 				))}
 			</div>
+
+			{winningText ? (
+				<WinningDisplay
+					text={winningText}
+					startNewGame={resetAppState}
+					undoLastMove={undoLastMove}
+				/>
+			) : null}
 		</div>
 	)
 }
