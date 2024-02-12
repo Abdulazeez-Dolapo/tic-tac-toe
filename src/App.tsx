@@ -2,23 +2,40 @@ import { FC, MouseEvent, useState } from "react"
 import "./App.css"
 
 type BoardType = string[]
-
-const Box: FC<{
+interface BoxProps {
 	value: string
 	handleClick: (e: MouseEvent<HTMLButtonElement>) => void
 	disableClick: boolean
-}> = ({ value, handleClick, disableClick }) => (
-	<button className="box" onClick={handleClick} disabled={disableClick}>
-		{value}
-	</button>
-)
+	isPartOfWinningCombo: boolean
+}
 
-const GameControls: FC<{
+interface GameControlsProps {
 	text: string
 	startNewGame: (e: MouseEvent<HTMLButtonElement>) => void
 	undoLastMove: (e: MouseEvent<HTMLButtonElement>) => void
 	disableUndo: boolean
-}> = ({ text, startNewGame, undoLastMove, disableUndo }) => {
+}
+
+const Box: FC<BoxProps> = ({
+	value,
+	handleClick,
+	disableClick,
+	isPartOfWinningCombo,
+}) => {
+	const classes = `box ${isPartOfWinningCombo ? "winner" : ""}`
+	return (
+		<button className={classes} onClick={handleClick} disabled={disableClick}>
+			{value}
+		</button>
+	)
+}
+
+const GameControls: FC<GameControlsProps> = ({
+	text,
+	startNewGame,
+	undoLastMove,
+	disableUndo,
+}) => {
 	return (
 		<div>
 			{text ? <p>{text}</p> : null}
@@ -40,6 +57,7 @@ function App() {
 	const [boardState, setBoardState] = useState(initialBoardState)
 	const [winningText, setWinningText] = useState("")
 	const [isGameOver, setIsGameOver] = useState(false)
+	const [winningCombo, setWinningCombo] = useState<number[]>([])
 	const [boardStateHistory, setBoardStateHistory] = useState([
 		initialBoardState,
 	])
@@ -96,7 +114,10 @@ function App() {
 				currentBoardState[a] === currentBoardState[b] &&
 				currentBoardState[a] === currentBoardState[c]
 
-			if (isWinner) break
+			if (isWinner) {
+				setWinningCombo([a, b, c])
+				break
+			}
 		}
 
 		return isWinner
@@ -108,6 +129,7 @@ function App() {
 		setBoardStateHistory([initialBoardState])
 		setWinningText("")
 		setIsGameOver(false)
+		setWinningCombo([])
 	}
 
 	const undoLastMove = () => {
@@ -116,6 +138,7 @@ function App() {
 		setBoardState(boardStateHistory[newCounter])
 		setWinningText("")
 		setIsGameOver(false)
+		setWinningCombo([])
 	}
 
 	return (
@@ -125,6 +148,8 @@ function App() {
 					<div className="row" key={rowIndex}>
 						{[0, 1, 2].map(colIndex => {
 							const boxIndex = rowIndex * 3 + colIndex
+							const isWinningBox =
+								isGameOver && winningCombo.includes(boxIndex)
 
 							return (
 								<Box
@@ -132,6 +157,7 @@ function App() {
 									value={boardState[boxIndex]}
 									handleClick={() => onBoxClick(boxIndex)}
 									disableClick={isGameOver}
+									isPartOfWinningCombo={isWinningBox}
 								/>
 							)
 						})}

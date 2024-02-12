@@ -22,3 +22,7 @@
 .box:hover {
 	cursor: pointer;
 }
+
+.winner {
+	background-color: red;
+}
