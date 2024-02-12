@@ -6,24 +6,28 @@ type BoardType = string[]
 const Box: FC<{
 	value: string
 	handleClick: (e: MouseEvent<HTMLButtonElement>) => void
-}> = ({ value, handleClick }) => (
-	<button className="box" onClick={handleClick}>
+	disableClick: boolean
+}> = ({ value, handleClick, disableClick }) => (
+	<button className="box" onClick={handleClick} disabled={disableClick}>
 		{value}
 	</button>
 )
 
-const WinningDisplay: FC<{
+const GameControls: FC<{
 	text: string
 	startNewGame: (e: MouseEvent<HTMLButtonElement>) => void
 	undoLastMove: (e: MouseEvent<HTMLButtonElement>) => void
-}> = ({ text, startNewGame, undoLastMove }) => {
+	disableUndo: boolean
+}> = ({ text, startNewGame, undoLastMove, disableUndo }) => {
 	return (
 		<div>
-			<p>{text}</p>
+			{text ? <p>{text}</p> : null}
 
 			<div>
 				<button onClick={startNewGame}>Start new game</button>
-				<button onClick={undoLastMove}>Undo Last Move</button>
+				<button onClick={undoLastMove} disabled={disableUndo}>
+					Undo Last Move
+				</button>
 			</div>
 		</div>
 	)
@@ -35,6 +39,7 @@ function App() {
 	const [counter, setCounter] = useState(0)
 	const [boardState, setBoardState] = useState(initialBoardState)
 	const [winningText, setWinningText] = useState("")
+	const [isGameOver, setIsGameOver] = useState(false)
 	const [boardStateHistory, setBoardStateHistory] = useState([
 		initialBoardState,
 	])
@@ -54,11 +59,12 @@ function App() {
 		updateHistory(newBoardState, newCounter)
 
 		const isWinner = calculateWinner(newBoardState)
-		if (isWinner)
+		if (isWinner) {
+			setIsGameOver(true)
 			setWinningText(
 				`Player ${isPlayerOne() ? "one" : "two"} has won the game`
 			)
-		console.log({ isWinner })
+		}
 	}
 
 	const updateHistory = (currentBoardState: BoardType, index: number) => {
@@ -101,9 +107,16 @@ function App() {
 		setBoardState(initialBoardState)
 		setBoardStateHistory([initialBoardState])
 		setWinningText("")
+		setIsGameOver(false)
 	}
 
-	const undoLastMove = () => {}
+	const undoLastMove = () => {
+		const newCounter = counter - 1
+		setCounter(newCounter)
+		setBoardState(boardStateHistory[newCounter])
+		setWinningText("")
+		setIsGameOver(false)
+	}
 
 	return (
 		<div className="wrapper">
@@ -118,6 +131,7 @@ function App() {
 									key={boxIndex}
 									value={boardState[boxIndex]}
 									handleClick={() => onBoxClick(boxIndex)}
+									disableClick={isGameOver}
 								/>
 							)
 						})}
@@ -125,13 +139,12 @@ function App() {
 				))}
 			</div>
 
-			{winningText ? (
-				<WinningDisplay
-					text={winningText}
-					startNewGame={resetAppState}
-					undoLastMove={undoLastMove}
-				/>
-			) : null}
+			<GameControls
+				text={winningText}
+				startNewGame={resetAppState}
+				undoLastMove={undoLastMove}
+				disableUndo={counter < 1}
+			/>
 		</div>
 	)
 }
