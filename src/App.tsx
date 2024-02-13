@@ -10,7 +10,6 @@ interface BoxProps {
 }
 
 interface GameControlsProps {
-	text: string
 	startNewGame: (e: MouseEvent<HTMLButtonElement>) => void
 	undoLastMove: (e: MouseEvent<HTMLButtonElement>) => void
 	disableUndo: boolean
@@ -31,21 +30,16 @@ const Box: FC<BoxProps> = ({
 }
 
 const GameControls: FC<GameControlsProps> = ({
-	text,
 	startNewGame,
 	undoLastMove,
 	disableUndo,
 }) => {
 	return (
 		<div>
-			{text ? <p>{text}</p> : null}
-
-			<div>
-				<button onClick={startNewGame}>Start new game</button>
-				<button onClick={undoLastMove} disabled={disableUndo}>
-					Undo Last Move
-				</button>
-			</div>
+			<button onClick={startNewGame}>Start new game</button>
+			<button onClick={undoLastMove} disabled={disableUndo}>
+				Undo Last Move
+			</button>
 		</div>
 	)
 }
@@ -76,12 +70,13 @@ function App() {
 		setCounter(newCounter)
 		updateHistory(newBoardState, newCounter)
 
-		const isWinner = calculateWinner(newBoardState)
+		const { isWinner, positions } = calculateWinner(newBoardState)
 		if (isWinner) {
 			setIsGameOver(true)
 			setWinningText(
 				`Player ${isPlayerOne() ? "one" : "two"} has won the game`
 			)
+			setWinningCombo(positions)
 		}
 	}
 
@@ -105,6 +100,7 @@ function App() {
 
 	const calculateWinner = (currentBoardState: BoardType) => {
 		let isWinner = false
+		let positions: number[] = []
 
 		for (let i = 0; i < winningCombinations.length; i++) {
 			const [a, b, c] = winningCombinations[i]
@@ -115,12 +111,12 @@ function App() {
 				currentBoardState[a] === currentBoardState[c]
 
 			if (isWinner) {
-				setWinningCombo([a, b, c])
+				positions = [a, b, c]
 				break
 			}
 		}
 
-		return isWinner
+		return { isWinner, positions }
 	}
 
 	const resetAppState = () => {
@@ -139,6 +135,14 @@ function App() {
 		setWinningText("")
 		setIsGameOver(false)
 		setWinningCombo([])
+	}
+
+	const getTextToDisplay = () => {
+		let text = `Player ${isPlayerOne() ? "One " : "Two "} to play next`
+		if (counter === 0) text = "Player one to start the game"
+		if (winningText) text = winningText
+
+		return text
 	}
 
 	return (
@@ -165,8 +169,9 @@ function App() {
 				))}
 			</div>
 
+			<p>{getTextToDisplay()}</p>
+
 			<GameControls
-				text={winningText}
 				startNewGame={resetAppState}
 				undoLastMove={undoLastMove}
 				disableUndo={counter < 1}
