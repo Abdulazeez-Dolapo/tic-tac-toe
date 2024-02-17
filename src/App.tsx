@@ -35,7 +35,7 @@ const GameControls: FC<GameControlsProps> = ({
 	disableUndo,
 }) => {
 	return (
-		<div>
+		<div className="game-controls">
 			<button onClick={startNewGame}>Start new game</button>
 			<button onClick={undoLastMove} disabled={disableUndo}>
 				Undo Last Move
@@ -74,7 +74,7 @@ function App() {
 		if (isWinner) {
 			setIsGameOver(true)
 			setWinningText(
-				`Player ${isPlayerOne() ? "one" : "two"} has won the game`
+				`Player ${isPlayerOne() ? "One" : "Two"} has won the game`
 			)
 			setWinningCombo(positions)
 		}
@@ -139,7 +139,7 @@ function App() {
 
 	const getTextToDisplay = () => {
 		let text = `Player ${isPlayerOne() ? "One " : "Two "} to play next`
-		if (counter === 0) text = "Player one to start the game"
+		if (counter === 0) text = "Player One to start the game"
 		if (winningText) text = winningText
 
 		return text
@@ -147,6 +147,8 @@ function App() {
 
 	return (
 		<div className="wrapper">
+			<p>{getTextToDisplay()}</p>
+
 			<div className="container">
 				{[0, 1, 2].map(rowIndex => (
 					<div className="row" key={rowIndex}>
@@ -168,8 +170,6 @@ function App() {
 					</div>
 				))}
 			</div>
-
-			<p>{getTextToDisplay()}</p>
 
 			<GameControls
 				startNewGame={resetAppState}
