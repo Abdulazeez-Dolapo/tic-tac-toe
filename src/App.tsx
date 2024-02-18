@@ -49,7 +49,7 @@ const initialBoardState: BoardType = Array(9).fill("")
 function App() {
 	const [counter, setCounter] = useState(0)
 	const [boardState, setBoardState] = useState(initialBoardState)
-	const [winningText, setWinningText] = useState("")
+	const [infoText, setInfoText] = useState("")
 	const [isGameOver, setIsGameOver] = useState(false)
 	const [winningCombo, setWinningCombo] = useState<number[]>([])
 	const [boardStateHistory, setBoardStateHistory] = useState([
@@ -73,10 +73,16 @@ function App() {
 		const { isWinner, positions } = calculateWinner(newBoardState)
 		if (isWinner) {
 			setIsGameOver(true)
-			setWinningText(
-				`Player ${isPlayerOne() ? "One" : "Two"} has won the game`
-			)
+			setInfoText(`Player ${isPlayerOne() ? "One" : "Two"} has won the game`)
 			setWinningCombo(positions)
+		}
+
+		const isGameOverWithNoWinner = !isWinner && newCounter > 8
+		if (isGameOverWithNoWinner) {
+			setIsGameOver(true)
+			setInfoText(
+				"No winner in this round. Start new game or undo last move"
+			)
 		}
 	}
 
@@ -123,7 +129,7 @@ function App() {
 		setCounter(0)
 		setBoardState(initialBoardState)
 		setBoardStateHistory([initialBoardState])
-		setWinningText("")
+		setInfoText("")
 		setIsGameOver(false)
 		setWinningCombo([])
 	}
@@ -132,15 +138,16 @@ function App() {
 		const newCounter = counter - 1
 		setCounter(newCounter)
 		setBoardState(boardStateHistory[newCounter])
-		setWinningText("")
+		setInfoText("")
 		setIsGameOver(false)
 		setWinningCombo([])
 	}
 
 	const getTextToDisplay = () => {
 		let text = `Player ${isPlayerOne() ? "One " : "Two "} to play next`
+
 		if (counter === 0) text = "Player One to start the game"
-		if (winningText) text = winningText
+		if (!!infoText) text = infoText
 
 		return text
 	}
